@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#12100e"><link rel="icon" href="icon-192.png"><title>Deep Dig – Competitive Mining Race</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+:root{--bg:#12100e;--card:#211d1a;--c2:#2c2723;--line:#3d352e;--ink:#f3eee7;--mut:#a89f94;--gold:#ffc83d;--red:#ff5a4a;--green:#5fd35a;--blue:#4a9eff;--px:'Press Start 2P',ui-monospace,monospace;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12100e}}
+:root[data-theme="dark"]{--bg:#12100e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 ui-sans-serif,system-ui,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#app{height:100%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px}
+.hud{display:grid;grid-template-columns:repeat(4,1fr) 38px;gap:6px;width:min(100%,460px)}
+.st{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 2px;text-align:center;font-size:9px;color:var(--mut);letter-spacing:.6px}
+.st b{display:block;font:14px var(--px);color:var(--gold);margin-top:4px}
+#tm.low{color:var(--red);animation:bl .5s infinite}@keyframes bl{50%{opacity:.35}}
+#quit{background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--mut);font-size:16px;cursor:pointer}
+#lb,#pw{display:flex;gap:4px;width:min(100%,460px);min-height:24px;align-items:center;overflow:hidden;flex-wrap:nowrap}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:2px 9px;font-size:11px;white-space:nowrap;color:var(--mut)}
+.chip.me{border-color:var(--gold);color:var(--gold);font-weight:700}.chip.pw{border-color:var(--blue);color:#bfe0ff}
+#cvw{flex:1;min-height:0;width:100%;display:flex;justify-content:center}
+#cv{height:100%;max-width:100%;aspect-ratio:308/440;border:3px solid #000;border-radius:6px;image-rendering:pixelated;background:#79c5f0}
+.ov{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:5;padding:10px}.ov.on{display:flex}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(440px,100%);max-height:100%;overflow:auto;text-align:center;box-shadow:0 12px 40px #000a}
+.logo{font:22px var(--px);color:var(--gold);text-shadow:3px 3px #000;margin:2px 0 6px}
+.sub,.hint{font-size:12px;color:var(--mut)}.hint{margin:4px 0;min-height:16px}
+.lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin:12px 0 5px;text-align:left}
+#nm,#joinCode{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px;text-align:center;font:inherit;margin-top:10px;user-select:text;-webkit-user-select:text}#joinCode{margin-top:0;text-transform:uppercase;letter-spacing:4px}
+.seg,.tgs{display:flex;gap:6px}.seg button,.tgs button{flex:1;background:var(--c2);color:var(--mut);border:1px solid var(--line);border-radius:10px;padding:10px 4px;font:inherit;cursor:pointer}
+.seg button.on{background:var(--gold);color:#201800;font-weight:700;border-color:var(--gold)}
+.tgs{margin-top:8px}.tgs button.on{color:var(--green);border-color:var(--green)}
+.btn{width:100%;margin-top:10px;background:var(--blue);color:#fff;border:0;border-radius:12px;padding:14px;font:700 15px inherit;font-family:inherit;cursor:pointer;box-shadow:0 3px #0004}
+.btn.alt{background:var(--c2);border:1px solid var(--line)}.btn:hover{filter:brightness(1.12)}.btn:disabled{opacity:.4}
+details{margin-top:10px;background:var(--c2);border-radius:10px;padding:9px 12px;text-align:left}summary{cursor:pointer;font-weight:600}
+#top10 div,.row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line);font-size:13px}
+.up{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:13px}.up button{background:var(--gold);color:#201800;border:0;border-radius:8px;padding:7px 10px;font:700 12px inherit;font-family:inherit;cursor:pointer}.up button:disabled{opacity:.35}
+.big{font:30px var(--px);color:var(--gold);margin:8px 0}
+#toast{position:fixed;top:calc(80px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#000d;border:2px solid var(--gold);border-radius:10px;padding:8px 14px;opacity:0;transition:opacity .2s;z-index:4;pointer-events:none;white-space:nowrap;font-weight:700}
+</style></head><body>
+<div id="app">
+ <div class="hud"><div class="st">TIME<b id="tm">60</b></div><div class="st">SCORE<b id="sc">0</b></div><div class="st">COMBO<b id="cb">x1</b></div><div class="st">DEPTH<b id="dp">0m</b></div><button id="quit" aria-label="Quit">✕</button></div>
+ <div id="lb"></div>
+ <div id="cvw"><canvas id="cv"></canvas></div>
+</div>
+<div id="toast"></div>
+<div class="ov" id="cdn"><div class="big" id="cdt" style="font-size:80px;text-shadow:4px 4px #000"></div></div>
+
+<div class="ov on" id="menu"><div class="box">
+ <div class="logo">⛏ DEEP DIG</div><div class="sub">Daily mining race · <span id="dayS"></span></div>
+ <input id="nm" maxlength="12" placeholder="Your name" autocomplete="off">
+ <div id="cfg"><div class="lbl">Difficulty</div>
+ <div class="seg" id="segD"><button data-v="easy">Easy</button><button data-v="medium">Medium</button><button data-v="hard">Hard</button></div><div class="hint" id="dHint"></div>
+ <div class="lbl">Round length</div>
+ <div class="seg" id="segT"><button data-v="30">30s</button><button data-v="60">60s</button><button data-v="90">90s</button></div>
+ <div class="tgs"><button id="tgSn"></button></div></div>
+ <div id="roomCard" style="display:none"><div class="lbl">Room code · tell your friends</div><div class="big" id="rCode">----</div><div class="hint" id="rCfg"></div><div id="rList" style="text-align:left"></div><button class="btn" id="rStart">▶ Start race</button><div class="hint" id="rWait"></div><button class="btn alt" id="rLeave">Leave room</button></div>
+ <div id="roomBtns"><button class="btn" id="mkRoom">🔑 Create room</button><div style="display:flex;gap:6px;margin-top:10px"><input id="joinCode" maxlength="4" placeholder="CODE" autocomplete="off"><button class="btn" id="joinBtn" style="margin:0;width:38%">Join</button></div></div>
+ <div class="hint" id="lobby"></div>
+ <button class="btn alt" id="play">▶ Solo vs bots</button>
+ <div class="hint">Your best here: <b id="best" style="color:var(--gold)">0</b></div>
+ <details><summary>🏆 Today's top 10 (this setting)</summary><div id="top10"></div></details>
+ <details><summary>🛠 Upgrades · <span id="coins">0</span> coins</summary><div id="shop"></div><div class="hint">Solo only. Races are always fair.</div></details>
+ <details><summary>❓ How to play</summary><div class="hint" style="line-height:1.6">Tap left / middle / right of the mine (or ← ↓ → · A S D) to dig. Chain blocks fast for combo up to x6. Gold and diamonds score big; diamonds add 3s. TNT blasts 3×3. Lava costs time.<br>Everyone digs the same world each day. To race friends: one person taps Create room and shares the 4-letter code, everyone else taps Join and types it. Only the host can start the race.</div></details>
+</div></div>
+
+<div class="ov" id="end"><div class="box">
+ <div class="logo" id="eTitle" style="font-size:18px">TIME UP!</div><div class="big" id="eScore">0</div>
+ <div id="eLb" style="text-align:left"></div><div class="hint" id="eInfo" style="margin-top:8px"></div>
+ <button class="btn" id="again">↻ Dig again</button><button class="btn alt" id="share">Share score</button><button class="btn alt" id="toMenu">Menu / options</button>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const T=44,C=7,VR=10,cv=$('#cv'),g=cv.getContext('2d');cv.width=T*C;cv.height=T*VR;
+const mem={};const ls=(k,v)=>{try{if(v===undefined){const x=localStorage.getItem('dd_'+k);return x===null?mem[k]:x}localStorage.setItem('dd_'+k,v)}catch(e){}if(v!==undefined)mem[k]=v;return mem[k]};
+const num=k=>+ls(k)||0;
+const day=new Date().toISOString().slice(0,10);let seed=0;for(const ch of day)seed=(seed*31+ch.charCodeAt(0))>>>0;$('#dayS').textContent=day;
+const hash=(r,c)=>{let h=(seed^Math.imul(r,374761393)^Math.imul(c,668265263))>>>0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296};
+/* options + difficulty */
+const DIF={easy:{lava:.5,tnt:1,hp:0,bot:.65,sm:1,tr:.08,pen:3,d:'Calm mine. Less lava, slower rivals.'},medium:{lava:1,tnt:1,hp:0,bot:1,sm:1.25,tr:.06,pen:4,d:'Balanced. Scores x1.25.'},hard:{lava:1.7,tnt:1.3,hp:1,bot:1.35,sm:1.6,tr:.045,pen:6,d:'Lava everywhere, tough blocks, fast rivals. Scores x1.6.'}};
+
+const O={diff:DIF[ls('diff')]?ls('diff'):'medium',dur:[30,60,90].includes(+ls('dur'))?+ls('dur'):60,snd:ls('snd')!=='0'};
+let CUR={D:DIF[O.diff]};
+const HP={dirt:1,stone:2,coal:2,iron:3,gold:3,diamond:4,tnt:1,lava:1},PTS={dirt:1,stone:2,coal:10,iron:25,gold:60,diamond:150,tnt:0,lava:0};
+const mk=(t,r)=>{const m=Math.max(1,HP[t]+((t==='dirt'||t==='tnt'||t==='lava')?0:(r/25|0)+CUR.D.hp));return{t,hp:m,max:m}};
+function gen0(r,c){if(r<0)return null;if(r===0)return mk('dirt',0);const h=hash(r,c),D=CUR.D;let a=0;
+ for(const[n,p]of[['lava',r>8?Math.min(.03+r*.0007,.09)*D.lava:0],['tnt',r>4?.035*D.tnt:0],['diamond',r>20?Math.min(.004+r*.0001,.02):0],['gold',r>10?Math.min(.01+r*.0002,.035):0],['iron',r>3?.06:0],['coal',.08]]){a+=p;if(h<a)return mk(n,r)}
+ return mk(r<6?'dirt':'stone',r)}
+const gen=gen0;
+const W=new Map();const cell=(r,c)=>{const k=r*C+c;if(!W.has(k))W.set(k,gen(r,c));return W.get(k)};
+/* audio */
+function sfx(f,d=.07,ty='square',v=.05){if(!O.snd)return;try{window.AC=window.AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),n=AC.createGain();o.type=ty;o.frequency.value=f;n.gain.value=v;n.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(n);n.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}}
+const BOTS=[['Creeper_King',70,0],['Steve_99',55,1.3],['Notch_Jr',45,2.1],['Alex_Pro',35,3.7],['Zombie_Bob',25,5]];
+const botS=(b,e)=>Math.floor(b[1]*e*CUR.D.bot*(1+.15*Math.sin(e*.7+b[2])));
+let G=null,tick=0,keys=[],tapDir=null,toastT,RM=null,DBX=null,peers=[],cdOn=0,unsub=null,ROOM=null,isHost=false,code='';const seenGo={};
+const mult=()=>Math.min(1+((G.combo/6)|0),6);
+function toast(s){const t=$('#toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>t.style.opacity=0,1500)}
+const pop=(x,y,s,col)=>G.tx.push({x,y,s,col,l:1});
+const burst=(x,y,col,n=6)=>{for(let i=0;i<n;i++)G.pt.push({x,y,vx:(Math.random()-.5)*4,vy:-Math.random()*3-1,l:1,col})};
+function start(mp,o){o=o||{diff:O.diff,dur:O.dur};W.clear();ls('name',$('#nm').value.trim().slice(0,12)||'Player');
+ ['menu','end','cdn'].forEach(i=>$('#'+i).classList.remove('on'));
+ const pk=mp?0:num('pk');CUR={D:DIF[o.diff]};
+ G={mp:!!mp,o,pk,r:-1,c:3,t:o.dur+(mp?0:4*num('tm')),el:0,score:0,combo:0,last:0,max:0,cam:-4,shake:0,pt:[],tx:[],over:false,next:0,rank:99,face:1,dig:0,blocks:0};
+ sfx(660,.15);toast('GO! DIG!');pshare()}
+function score(n,x,y,col){const p=Math.round(n*mult()*CUR.D.sm);G.score+=p;pop(x,y,'+'+p,col||'#fff')}
+function boom(r,c){G.shake=14;sfx(55,.4,'sawtooth',.12);burst(c*T+T/2,r*T,'#ffb347',16);
+ for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const rr=r+dr,cc=c+dc;if(rr<0||cc<0||cc>=C)continue;const o=cell(rr,cc);if(!o)continue;W.set(rr*C+cc,null);if(o.t==='lava')continue;if(o.t==='tnt'){boom(rr,cc);continue}score(PTS[o.t]*2,cc*T+T/2,rr*T,'#ffb347');if(o.t==='diamond')G.t+=3}}
+function breakB(b,r,c){const now=performance.now();G.combo=(now-G.last<900)?G.combo+1:1;G.last=now;G.blocks++;const x=c*T+T/2,y=r*T;
+ if(b.t==='lava'){{G.t-=CUR.D.pen;G.combo=0;G.shake=8;pop(x,y,'-'+CUR.D.pen+'s','#ff5a4a');burst(x,y,'#ff7a1a',12);sfx(90,.3,'sawtooth',.08)}return}
+ if(b.t==='tnt'){boom(r,c);return}
+ score(PTS[b.t],x,y,b.t==='diamond'?'#4df0ff':b.t==='gold'?'#ffd84a':'#fff');burst(x,y+T/2,b.t==='dirt'?'#8b5a2b':'#999',5);
+ if(b.t==='diamond'){G.t+=3;pop(x,y-14,'+3s','#4df0ff');sfx(900,.2,'triangle',.08)}else if(PTS[b.t]>=10)sfx(520+G.combo*20,.1,'triangle',.07);else sfx(160+Math.random()*60,.05)}
+function act(dr,dc){if(!dc&&dr<0&&G.r<=-1)return;const nr=G.r+dr,nc=G.c+dc;if(nc<0||nc>=C||nr<-1)return;if(dc)G.face=dc;
+ const b=cell(nr,nc);if(!b){G.r=nr;G.c=nc;if(nr>G.max){G.max=nr;score(3,nc*T+T/2,nr*T,'#9f9')}return}
+ G.dig=6;b.hp-=1+G.pk;G.shake=Math.max(G.shake,1.5);if(b.hp>0){sfx(140,.04);return}
+ W.set(nr*C+nc,null);breakB(b,nr,nc);if(b.t!=='tnt'&&!G.over){G.r=nr;G.c=nc;if(nr>G.max){G.max=nr;score(3,nc*T+T/2,nr*T,'#9f9')}}}
+function ranks(){const ps=G.mp?peers.filter(p=>p.presence&&p.presence.mp):[];
+ const a=G.mp?ps.map(p=>({n:String(p.presence.name||'Guest').slice(0,12),s:+p.presence.score||0})):BOTS.map(b=>({n:b[0],s:botS(b,G.el)}));
+ a.push({n:'YOU',s:G.score,me:1});a.sort((x,y)=>y.s-x.s);return a}
+const bk=(o=O)=>'best_'+o.diff+'_'+o.dur;
+function finish(){G.over=true;const a=ranks(),rk=a.findIndex(x=>x.me)+1,nb=G.score>num(bk(G.o)),cn=Math.floor(G.score/15);
+ if(nb)ls(bk(G.o),G.score);ls('coins',num('coins')+cn);G.fin={rk,n:a.length};pshare();
+ if(DBX&&G.score>0){try{DBX.collection('scores-'+day+'-'+G.o.diff+'-'+G.o.dur).add({name:ls('name')||'Player',score:G.score,depth:G.max}).catch(()=>{})}catch(e){}}
+ $('#eTitle').textContent=rk===1?'🏆 YOU WIN!':'TIME UP · #'+rk;$('#eScore').textContent=G.score;
+ $('#eLb').innerHTML=a.map((x,i)=>'<div class="row"'+(x.me?' style="color:var(--gold);font-weight:700"':'')+'><span>'+(['🥇','🥈','🥉'][i]||(i+1)+'.')+' '+esc(x.n)+'</span><span>'+x.s+'</span></div>').join('');
+ $('#eInfo').textContent=(nb?'🎉 New best! ':'')+'+'+cn+' coins · '+G.blocks+' blocks · '+G.max+'m deep'+(G.mp?' · others may still be digging':'');
+ $('#again').textContent=G.mp?(isHost?'⚔ Race again':'↩ Back to room'):'↻ Dig again';$('#end').classList.add('on');sfx(rk===1?880:200,.4,'triangle',.08)}
+/* menu */
+const UP=[['pk','Pickaxe',100],['tm','+4s time',120]];
+function syncOpts(){$$('#segD button').forEach(b=>b.classList.toggle('on',b.dataset.v===O.diff));$$('#segT button').forEach(b=>b.classList.toggle('on',+b.dataset.v===O.dur));
+ $('#dHint').textContent=DIF[O.diff].d;$('#tgSn').textContent='🔊 Sound: '+(O.snd?'ON':'OFF');$('#tgSn').classList.toggle('on',O.snd);
+ $('#best').textContent=num(bk());$('#coins').textContent=num('coins');
+ $('#shop').innerHTML=UP.map(u=>{const l=num(u[0]),c=u[2]*(l+1);return '<div class="up"><span>'+u[1]+' · Lv '+l+'/5</span><button data-k="'+u[0]+'" '+(l>=5||num('coins')<c?'disabled':'')+'>'+(l>=5?'MAX':c+' coins')+'</button></div>'}).join('');
+ $$('#shop button').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x[0]===b.dataset.k),l=num(u[0]),c=u[2]*(l+1);if(l<5&&num('coins')>=c){ls('coins',num('coins')-c);ls(u[0],l+1);sfx(700,.1);syncOpts()}});subBoard();if(ROOM&&isHost)ROOM.presence({diff:O.diff,dur:O.dur}).catch(()=>{})}
+function subBoard(){if(unsub){try{unsub()}catch(e){}unsub=null}if(!DBX)return;
+ try{unsub=DBX.collection('scores-'+day+'-'+O.diff+'-'+O.dur).orderBy('score','desc').limit(10).onSnapshot(s=>{$('#top10').innerHTML=s.docs.length?s.docs.map((d,i)=>{const x=d.data();return '<div><span>'+(i+1)+'. '+esc(x.name)+'</span><b>'+(+x.score||0)+'</b></div>'}).join(''):'<div class="hint">No scores yet. Be first!</div>'},()=>{})}catch(e){}}
+$$('#segD button').forEach(b=>b.onclick=()=>{O.diff=b.dataset.v;ls('diff',O.diff);syncOpts()});
+$$('#segT button').forEach(b=>b.onclick=()=>{O.dur=+b.dataset.v;ls('dur',O.dur);syncOpts()});
+$('#tgSn').onclick=()=>{O.snd=!O.snd;ls('snd',O.snd?1:0);syncOpts()};
+$('#nm').value=ls('name')||'';
+function lobby(){roomUI()}
+const CH='ABCDEFGHJKMNPQRSTUVWXYZ23456789',meName=()=>$('#nm').value.trim().slice(0,12)||'Player';
+function roomUI(){const inR=!!ROOM,hp=peers.find(p=>p.presence&&p.presence.host),cfg=isHost?O:hp?{diff:DIF[hp.presence.diff]?hp.presence.diff:'medium',dur:+hp.presence.dur||60}:null;
+ $('#roomCard').style.display=inR?'block':'none';$('#roomBtns').style.display=inR?'none':'block';$('#cfg').style.display=(!inR||isHost)?'block':'none';$('#play').style.display=inR?'none':'block';
+ $('#lobby').textContent=RM?'':'Live rooms unavailable here – solo only';if(!inR)return;
+ $('#rCode').textContent=code;
+ $('#rList').innerHTML=[{n:meName(),me:1,h:isHost}].concat(peers.map(p=>({n:String(p.presence.name||'Guest').slice(0,12),h:p.presence.host}))).map(x=>'<div class="row"><span>'+(x.h?'👑 ':'')+esc(x.n)+(x.me?' (you)':'')+'</span></div>').join('');
+ $('#rCfg').textContent=cfg?cfg.diff.toUpperCase()+' · '+cfg.dur+'s':'Waiting for the host…';
+ $('#rStart').style.display=isHost?'block':'none';$('#rWait').textContent=isHost?(peers.length?'':'Share the code – friends tap Join and type it'):'Waiting for the host to start…'}
+function countdown(mp,o){if(cdOn)return;cdOn=1;['menu','end'].forEach(i=>$('#'+i).classList.remove('on'));$('#cdn').classList.add('on');let n=3;const show=()=>{$('#cdt').textContent=n>0?n:'DIG!';sfx(n>0?440:880,.12)};show();
+ const iv=setInterval(()=>{n--;if(n>=0)show();if(n<0){clearInterval(iv);cdOn=0;start(mp,o)}},800)}
+async function leaveRoom(){try{ROOM&&await ROOM.leave()}catch(e){}ROOM=null;isHost=false;code='';peers=[];roomUI()}
+async function enterRoom(c,host){if(!RM){toast('Live rooms unavailable here');return}if(ROOM)await leaveRoom();
+ try{ROOM=await RM.join('dd-'+c.toLowerCase())}catch(e){ROOM=null;toast('Could not open room'+(e&&e.code?' ('+e.code+')':''));return}
+ code=c;isHost=host;peers=[];ls('name',meName());
+ ROOM.onPeers(ch=>{peers=ch.peers.filter(p=>!p.isMe);ch.joined.forEach(p=>seenGo[p.peer]=p.presence.go);
+  ch.updated.forEach(p=>{const q=p.presence;if(!isHost&&q.host&&q.go&&q.go!==seenGo[p.peer]){seenGo[p.peer]=q.go;if(!G||G.over||!G.mp)countdown(true,{diff:DIF[q.diff]?q.diff:'medium',dur:[30,60,90].includes(+q.dur)?+q.dur:60})}});roomUI()});
+ try{await ROOM.presence({name:meName(),host:host?1:0,diff:O.diff,dur:O.dur,mp:0,score:0,go:null})}catch(e){}roomUI()}
+function startRace(){if(!ROOM||!isHost)return;const r=ROOM;try{r.presence({go:Date.now(),diff:O.diff,dur:O.dur,score:0,depth:0,done:0,mp:1}).catch(()=>{});setTimeout(()=>r.presence({go:null}).catch(()=>{}),1500)}catch(e){}countdown(true,{diff:O.diff,dur:O.dur})}
+$('#mkRoom').onclick=()=>enterRoom(Array.from({length:4},()=>CH[Math.random()*CH.length|0]).join(''),true);
+$('#joinBtn').onclick=()=>{const c=$('#joinCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);if(c.length<4){toast('Enter the 4-letter code');return}enterRoom(c,false)};
+$('#rStart').onclick=startRace;$('#rLeave').onclick=leaveRoom;$('#play').onclick=()=>countdown(false);
+$('#again').onclick=()=>{if(G&&G.mp){if(isHost)startRace();else{$('#end').classList.remove('on');$('#menu').classList.add('on')}}else countdown(false)};
+$('#toMenu').onclick=()=>{$('#end').classList.remove('on');$('#menu').classList.add('on');syncOpts()};
+$('#quit').onclick=()=>{if(G&&!G.over){G.over=true;pshare()}$('#menu').classList.add('on');syncOpts()};
+$('#share').onclick=async()=>{const s='⛏️ Deep Dig '+day+' ('+G.o.diff+', '+G.o.dur+'s): I scored '+G.score+' – rank #'+G.fin.rk+'/'+G.fin.n+', '+G.max+'m deep. Beat me!';
+ try{if(navigator.share)await navigator.share({text:s});else{await navigator.clipboard.writeText(s);$('#share').textContent='Copied!'}}catch(e){$('#share').textContent='Copy failed'}};
+/* multiplayer */
+function pshare(){try{ROOM&&G&&G.mp&&ROOM.presence({name:ls('name')||'Player',score:G.score,depth:Math.max(0,G.max),done:G.over?1:0,mp:1}).catch(()=>{})}catch(e){}}
+async function initMP(){lobby();
+ try{RM=await claude.use('room')}catch(e){RM=null}
+ lobby();try{DBX=await claude.use('db')}catch(e){DBX=null}subBoard()}
+/* input */
+const KM={ArrowLeft:[0,-1],a:[0,-1],ArrowRight:[0,1],d:[0,1],ArrowDown:[1,0],s:[1,0],ArrowUp:[-1,0],w:[-1,0]};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const k=e.key.length>1?e.key:e.key.toLowerCase();if(KM[k]){e.preventDefault();if(!keys.includes(k))keys.push(k)}});
+addEventListener('keyup',e=>{const k=e.key.length>1?e.key:e.key.toLowerCase();keys=keys.filter(x=>x!==k)});
+const tapAt=e=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;tapDir=x<.33?[0,-1]:x>.67?[0,1]:[1,0]};
+cv.addEventListener('pointerdown',e=>{tapAt(e);cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(tapDir)tapAt(e)});
+['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,()=>tapDir=null));
+/* draw */
+const OREC={coal:'#1b1b1b',iron:'#e0b896',gold:'#ffd84a',diamond:'#4df0ff'},DOT=[[8,8],[26,12],[14,26],[30,30],[19,18]];
+function block(b,x,y,r){const l=Math.max(26,50-r*.2);
+ g.fillStyle=b.t==='dirt'?'#8b5a2b':b.t==='tnt'?'#d33':b.t==='lava'?'hsl('+(22+Math.sin(tick/6+r)*8)+',100%,55%)':'hsl(220,6%,'+l+'%)';g.fillRect(x,y,T,T);
+ g.fillStyle='#fff3';g.fillRect(x,y,T,3);g.fillRect(x,y,3,T);g.fillStyle='#0004';g.fillRect(x,y+T-3,T,3);g.fillRect(x+T-3,y,3,T);
+ if(OREC[b.t]){g.fillStyle=OREC[b.t];DOT.forEach(d=>g.fillRect(x+d[0],y+d[1],8,8))}
+ if(b.t==='tnt'){g.fillStyle='#fff';g.fillRect(x,y+15,T,14);g.fillStyle='#000';g.font='bold 11px monospace';g.fillText('TNT',x+10,y+26)}
+ if(b.hp<b.max){g.strokeStyle='#0008';g.lineWidth=2;g.beginPath();g.moveTo(x+8,y+6);g.lineTo(x+22,y+22);g.lineTo(x+14,y+38);g.moveTo(x+22,y+22);g.lineTo(x+38,y+30);g.stroke()}}
+function draw(){const sh=G?G.shake:0;g.save();g.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
+ const gr=g.createLinearGradient(0,0,0,cv.height);gr.addColorStop(0,'#79c5f0');gr.addColorStop(1,'#cfeeff');g.fillStyle=gr;g.fillRect(-10,-10,cv.width+20,cv.height+20);
+ const cam=G?G.cam:-4,r0=Math.floor(cam);
+ for(let i=-1;i<=VR+1;i++){const r=r0+i,y=Math.round((r-cam)*T);for(let c=0;c<C;c++){const b=r>=0?cell(r,c):null;if(b)block(b,c*T,y,r);else if(r>=0){g.fillStyle='#0008';g.fillRect(c*T,y,T,T)}}if(r===0){g.fillStyle='#4cae2c';g.fillRect(0,y-5,cv.width,8)}}
+ if(G){const y=(G.r-G.cam)*T,x=G.c*T,f=G.face,sw=G.dig>0?-8:0;
+  g.fillStyle='#3a5fcd';g.fillRect(x+12,y+24,20,14);g.fillStyle='#3a2a1c';g.fillRect(x+13,y+38,8,6);g.fillRect(x+23,y+38,8,6);
+  g.fillStyle='#c68642';g.fillRect(x+11,y+5,22,20);g.fillStyle='#2b1b12';g.fillRect(x+11,y+5,22,6);g.fillStyle='#fff';g.fillRect(x+(f>0?24:14),y+13,5,4);g.fillStyle='#222';g.fillRect(x+(f>0?27:14),y+14,2,3);
+  g.fillStyle='#bbb';g.fillRect(x+(f>0?30:2),y+20+sw,12,5);g.fillStyle='#5b3d1e';g.fillRect(x+(f>0?28:12),y+24+sw,3,12);
+  G.pt.forEach(p=>{g.fillStyle=p.col;g.globalAlpha=Math.max(0,p.l);g.fillRect(p.x,p.y-G.cam*T,4,4)});g.globalAlpha=1;
+  g.font='bold 15px monospace';G.tx.forEach(p=>{g.globalAlpha=Math.max(0,p.l);const yy=p.y-G.cam*T-(1-p.l)*30;g.fillStyle='#000';g.fillText(p.s,p.x-14+1,yy+1);g.fillStyle=p.col;g.fillText(p.s,p.x-14,yy)});g.globalAlpha=1}
+ g.restore()}
+/* loop */
+let lastTs=0;
+function loop(ts){const dt=Math.min(.05,(ts-lastTs)/1000||0);lastTs=ts;tick++;
+ if(G){G.cam+=((G.r-3)-G.cam)*.2;G.shake*=.85;if(G.dig>0)G.dig--;G.pt.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.2;p.l-=.03});G.pt=G.pt.filter(p=>p.l>0);G.tx.forEach(p=>p.l-=.02);G.tx=G.tx.filter(p=>p.l>0);
+  if(!G.over){G.t-=dt;G.el+=dt;
+   if(performance.now()>=G.next){const d=tapDir||(keys.length?KM[keys[keys.length-1]]:null);if(d){act(d[0],d[1]);G.next=performance.now()+(110-G.pk*6)}}
+   if(performance.now()-G.last>900&&G.combo)G.combo=0;
+   const a=ranks(),rk=a.findIndex(x=>x.me)+1;if(rk<G.rank&&G.rank!==99){toast(rk===1?'👑 YOU TAKE #1!':'Passed '+a[rk].n+'!');sfx(780,.12,'triangle',.07)}else if(rk>G.rank&&G.rank!==99)toast(a[rk-2].n+' overtook you!');G.rank=rk;
+   if(G.mp&&tick%10===0)pshare();
+   if(tick%6===0){$('#lb').innerHTML=a.slice(0,4).map((x,i)=>'<span class="chip'+(x.me?' me':'')+'">'+(i+1)+' '+esc(x.n.slice(0,9))+' '+x.s+'</span>').join('')+(rk>4?'<span class="chip me">'+rk+' YOU '+G.score+'</span>':'');}
+   if(G.t<=0){G.t=0;finish()}}
+  $('#tm').textContent=Math.ceil(G.t);$('#tm').className=G.t<10?'low':'';$('#sc').textContent=G.score;$('#cb').textContent='x'+mult();$('#dp').textContent=Math.max(0,G.max)+'m'}
+ draw();requestAnimationFrame(loop)}
+syncOpts();initMP();requestAnimationFrame(loop);
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
